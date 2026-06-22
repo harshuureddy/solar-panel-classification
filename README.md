@@ -2,310 +2,370 @@
 
 ## Project Overview
 
-This project focuses on detecting and classifying defects in solar panels using Deep Learning and Computer Vision techniques. The objective is to automatically identify different types of solar panel conditions from images and classify them into predefined categories.
+This project is an end-to-end deep learning application for classifying solar panel images into different defect categories. The goal is to detect whether a solar panel is clean or affected by issues such as dust, bird droppings, snow coverage, electrical damage, or physical damage.
 
-The project implements Convolutional Neural Networks (CNNs), Transfer Learning, Hyperparameter Optimization, and a Streamlit web application for real-time predictions.
-
----
-
-## Business Problem
-
-Solar panels are exposed to various environmental conditions that can reduce their efficiency and energy output. Manual inspection of solar panels is time-consuming, expensive, and difficult to scale.
-
-An automated defect detection system can:
-
-* Reduce inspection costs
-* Improve maintenance efficiency
-* Detect faults early
-* Increase solar energy production
-* Enable real-time monitoring
+The project covers dataset analysis, CNN model building, transfer learning, hyperparameter tuning, Streamlit application development, and cloud deployment preparation.
 
 ---
 
-## Project Objectives
+## Problem Statement
 
-* Build an image classification model for solar panel defect detection.
-* Compare custom CNN models with Transfer Learning models.
-* Improve model performance using Hyperparameter Optimization.
-* Deploy the final model as a Streamlit web application.
-* Enable users to upload solar panel images and receive instant predictions.
+Solar panels can lose efficiency due to dust, snow, physical cracks, bird droppings, and electrical faults. Manual inspection is time-consuming and difficult to scale. This project uses computer vision to automatically classify solar panel conditions from images.
 
 ---
 
-## Dataset Information
+## Classes
 
-The dataset contains approximately 885 solar panel images belonging to six classes.
+The dataset contains six classes:
 
 | Class             | Description                        |
 | ----------------- | ---------------------------------- |
-| Clean             | Normal solar panel without defects |
-| Bird-Drop         | Bird droppings on panel surface    |
-| Dusty             | Dust accumulation on panel         |
-| Electrical-Damage | Electrical faults or damaged cells |
-| Physical-Damage   | Cracks or physical damage          |
-| Snow-Covered      | Solar panel covered with snow      |
-
-### Dataset Distribution
-
-| Class             | Images |
-| ----------------- | ------ |
-| Clean             | ~194   |
-| Bird-Drop         | ~200   |
-| Dusty             | ~190   |
-| Electrical-Damage | ~103   |
-| Physical-Damage   | ~69    |
-| Snow-Covered      | ~120   |
-
-Total Images: ~885
+| Bird-drop         | Bird droppings on the solar panel  |
+| Clean             | Solar panel without visible defect |
+| Dusty             | Dust accumulation on the panel     |
+| Electrical-damage | Electrical fault or damaged cells  |
+| Physical-Damage   | Cracks or visible physical damage  |
+| Snow-Covered      | Panel covered with snow            |
 
 ---
 
-## Technology Stack
+## Dataset Summary
 
-### Programming Language
+Total images:
+
+```text
+885 images
+```
+
+Training images:
+
+```text
+708 images
+```
+
+Validation images:
+
+```text
+177 images
+```
+
+Image size used:
+
+```text
+224 × 224 × 3
+```
+
+Batch size:
+
+```text
+32
+```
+
+Validation split:
+
+```text
+20%
+```
+
+---
+
+## Technologies Used
 
 * Python
-
-### Deep Learning Framework
-
 * TensorFlow
 * Keras
-
-### Computer Vision
-
-* OpenCV
-* PIL (Python Imaging Library)
-
-### Data Processing
-
+* EfficientNetB0
+* MobileNetV2
+* Keras Tuner
 * NumPy
 * Matplotlib
-
-### Model Optimization
-
-* Keras Tuner
-
-### Web Application
-
+* PIL
 * Streamlit
-
-### Deployment
-
-* AWS EC2
 
 ---
 
 ## Project Workflow
 
-### Step 1: Data Understanding
-
-The dataset was analyzed to understand:
-
-* Class distribution
-* Data imbalance
-* Image quality
-* Defect patterns
-
-Several classes had fewer samples, making the dataset moderately imbalanced.
-
----
-
-### Step 2: Data Preprocessing
-
-Images were resized to:
-
-```python
-224 x 224
+```text
+Dataset Loading
+        ↓
+Data Preprocessing
+        ↓
+Base CNN Model
+        ↓
+Overfitting Analysis
+        ↓
+Regularization Experiments
+        ↓
+Transfer Learning
+        ↓
+EfficientNetB0 Model
+        ↓
+Hyperparameter Tuning
+        ↓
+Model Saving
+        ↓
+Streamlit Web App
+        ↓
+Deployment Preparation
 ```
 
-Additional preprocessing included:
-
-* Image normalization
-* Tensor conversion
-* EfficientNet preprocessing
-
 ---
 
-### Step 3: Base CNN Model
+## Base CNN Model
 
-A custom CNN model was created using:
+A custom CNN model was first built using:
 
-* Conv2D Layers
-* MaxPooling Layers
-* Flatten Layer
-* Dense Layers
-* Softmax Output Layer
+* Rescaling
+* Conv2D
+* MaxPooling2D
+* Flatten
+* Dense layer
+* Softmax output layer
 
 Architecture:
 
 ```text
 Input Image
-      ↓
-Conv2D
-      ↓
-MaxPooling
-      ↓
-Conv2D
-      ↓
-MaxPooling
-      ↓
-Conv2D
-      ↓
-MaxPooling
-      ↓
+    ↓
+Conv2D(32)
+    ↓
+MaxPooling2D
+    ↓
+Conv2D(64)
+    ↓
+MaxPooling2D
+    ↓
+Conv2D(128)
+    ↓
+MaxPooling2D
+    ↓
 Flatten
-      ↓
-Dense
-      ↓
-Output (6 Classes)
+    ↓
+Dense(128)
+    ↓
+Dense(6, softmax)
 ```
 
 ---
 
-## Initial Results
+## Base CNN Results
 
-| Metric              | Result |
+### 10 Epochs
+
+| Metric              | Value  |
 | ------------------- | ------ |
-| Training Accuracy   | ~99%   |
-| Validation Accuracy | ~62%   |
+| Training Accuracy   | 97.46% |
+| Validation Accuracy | 64.41% |
+| Training Loss       | 0.1042 |
+| Validation Loss     | 2.0586 |
 
 Observation:
 
-The model suffered from severe overfitting.
+The model was overfitting because training accuracy became very high while validation accuracy stayed low.
 
 ---
 
-## Step 4: Overfitting Reduction Techniques
+### 20 Epochs
 
-Several regularization techniques were applied:
-
-### Early Stopping
-
-Automatically stops training when validation performance stops improving.
-
-### Batch Normalization
-
-Added after convolution layers to stabilize learning.
-
-### Dropout
-
-Randomly disables neurons during training to improve generalization.
-
-### Learning Rate Scheduling
-
-Gradually reduces learning rate during training.
-
-### Data Augmentation
-
-Implemented:
-
-* Random Rotation
-* Random Zoom
-* Horizontal Flip
-
-Despite these improvements, validation accuracy remained unsatisfactory.
-
----
-
-## Step 5: Transfer Learning
-
-To improve performance, pretrained CNN models were used.
-
-### MobileNetV2
-
-Configuration:
-
-* ImageNet weights
-* Frozen base model
-* GlobalAveragePooling2D
-* Dense Layer
-* Softmax Output
-
-Results:
-
-| Metric              | Result |
+| Metric              | Value  |
 | ------------------- | ------ |
-| Training Accuracy   | ~91%   |
-| Validation Accuracy | ~74%   |
+| Training Accuracy   | 99.72% |
+| Validation Accuracy | 63.28% |
+| Training Loss       | 0.0184 |
+| Validation Loss     | 1.7914 |
 
-MobileNetV2 improved performance significantly compared to the custom CNN.
-
----
-
-### EfficientNetB0
-
-Configuration:
-
-* ImageNet pretrained weights
-* Transfer Learning
-* Data Augmentation
-* Class Weights
-
-Results:
-
-| Metric              | Result |
-| ------------------- | ------ |
-| Training Accuracy   | ~96%   |
-| Validation Accuracy | ~81%   |
-
-EfficientNetB0 became the best-performing model.
-
----
-
-## Step 6: Class Weight Balancing
-
-Since some classes had fewer samples, class weights were calculated.
-
-Formula:
-
-```python
-class_weight = total_images / (num_classes * images_per_class)
-```
-
-Benefits:
-
-* Improved minority class learning
-* Reduced bias toward majority classes
-
----
-
-## Step 7: Hyperparameter Optimization
-
-Keras Tuner was used to automatically search for the best model configuration.
-
-### Tuned Parameters
-
-* Learning Rate
-* Dropout Rate
-* Dense Units
-* Rotation Factor
-* Zoom Factor
-
-### Search Configuration
-
-* 20 Trials
-* Early Stopping Enabled
-* EfficientNetB0 Base Model
-
-Execution Time:
+Best validation accuracy during this run:
 
 ```text
-Approximately 7 Hours
+70.62%
+```
+
+Observation:
+
+Increasing epochs did not solve overfitting.
+
+---
+
+## Overfitting Reduction Attempts
+
+The following techniques were tried:
+
+* EarlyStopping
+* Dropout
+* Batch Normalization
+* Learning rate scheduling
+* Data augmentation
+
+However, these approaches did not produce strong validation performance with the custom CNN.
+
+---
+
+## Transfer Learning
+
+Since the custom CNN was overfitting, transfer learning was used.
+
+Transfer learning allows the model to use pretrained image features from large datasets such as ImageNet.
+
+---
+
+## MobileNetV2 Model
+
+MobileNetV2 was used with:
+
+```python
+include_top=False
+weights="imagenet"
+base_model.trainable = False
+```
+
+### MobileNetV2 Result After 10 Epochs
+
+| Metric              | Value  |
+| ------------------- | ------ |
+| Training Accuracy   | 85.88% |
+| Validation Accuracy | 69.49% |
+| Training Loss       | 0.3907 |
+| Validation Loss     | 0.8831 |
+
+Best validation accuracy during this run:
+
+```text
+75.71%
+```
+
+MobileNetV2 improved performance compared to the base CNN.
+
+---
+
+## EfficientNetB0 Model
+
+EfficientNetB0 was then used because it is a strong transfer learning model for image classification.
+
+Configuration:
+
+```python
+EfficientNetB0(
+    input_shape=(224, 224, 3),
+    include_top=False,
+    weights="imagenet"
+)
+```
+
+The base EfficientNetB0 model was frozen:
+
+```python
+base_model.trainable = False
+```
+
+---
+
+## Class Weights
+
+The dataset was imbalanced, so class weights were calculated.
+
+Class weights used:
+
+```python
+{
+    0: 0.7530,
+    1: 0.7491,
+    2: 0.7649,
+    3: 1.4110,
+    4: 2.1063,
+    5: 1.1816
+}
+```
+
+This helped give more importance to minority classes.
+
+---
+
+## EfficientNetB0 Results
+
+### 15 Epochs
+
+| Metric              | Value  |
+| ------------------- | ------ |
+| Training Accuracy   | 95.20% |
+| Validation Accuracy | 79.10% |
+| Training Loss       | 0.1690 |
+| Validation Loss     | 0.6418 |
+
+Best validation accuracy during this run:
+
+```text
+80.23%
+```
+
+EfficientNetB0 gave the best performance before tuning.
+
+---
+
+## Hyperparameter Tuning
+
+Keras Tuner was used for hyperparameter optimization.
+
+Tuned parameters:
+
+* Rotation factor
+* Zoom factor
+* Dropout rate
+* Dense units
+* Learning rate
+
+Search method:
+
+```text
+Random Search
+```
+
+Number of trials:
+
+```text
+3 trials
+```
+
+Total tuning time shown in notebook:
+
+```text
+28 minutes 18 seconds
+```
+
+---
+
+## Best Hyperparameters
+
+```python
+{
+    "rotation_factor": 0.05,
+    "zoom_factor": 0.25,
+    "dropout_rate": 0.0,
+    "dense_units": 64,
+    "learning_rate": 0.002240080343891231
+}
 ```
 
 ---
 
 ## Final Model Performance
 
-| Metric              | Value |
-| ------------------- | ----- |
-| Training Accuracy   | ~96%  |
-| Validation Accuracy | ~83%  |
-
-Final Selected Model:
+Final validation accuracy after tuning:
 
 ```text
-EfficientNetB0 + Hyperparameter Tuning
+79.66%
+```
+
+Final validation loss:
+
+```text
+0.6468
+```
+
+Final selected model:
+
+```text
+EfficientNetB0 with Keras Tuner optimization
 ```
 
 ---
@@ -315,12 +375,6 @@ EfficientNetB0 + Hyperparameter Tuning
 The final model was saved as:
 
 ```text
-trained_effnet_finetune.h5
-```
-
-or
-
-```text
 trained_effnet_finetune.keras
 ```
 
@@ -328,125 +382,173 @@ trained_effnet_finetune.keras
 
 ## Streamlit Application
 
-A Streamlit application was developed to allow real-time image classification.
+A Streamlit web application was created to make predictions from uploaded solar panel images.
 
-### Features
+### App Features
 
 * Upload solar panel image
-* Predict defect category
-* Display confidence score
-* Show Top-3 Predictions
-* Display probabilities for all classes
+* Display uploaded image
+* Resize image to 224×224
+* Apply EfficientNet preprocessing
+* Predict defect class
+* Show confidence score
+* Show top 3 predictions
+* Show all class probabilities
 
 ---
 
-## Application Workflow
+## Streamlit Prediction Flow
 
 ```text
-Upload Image
-      ↓
-Resize Image
-      ↓
-Preprocess Input
-      ↓
-Load EfficientNet Model
-      ↓
-Generate Predictions
-      ↓
-Identify Highest Probability Class
-      ↓
-Display Result
+User uploads image
+        ↓
+Image converted to RGB
+        ↓
+Image resized to 224×224
+        ↓
+Image converted to NumPy array
+        ↓
+Batch dimension added
+        ↓
+EfficientNet preprocessing applied
+        ↓
+Model predicts probabilities
+        ↓
+Highest probability class selected
+        ↓
+Prediction and confidence displayed
 ```
 
 ---
 
-## Sample Output
+## Example App Output
 
 ```text
-Prediction:
-Dusty
+Prediction: Bird-drop
+Confidence: 68.0%
 
-Confidence:
-60.2%
-
-Top Predictions:
-1. Dusty
-2. Bird-Drop
+Top 3 Predictions:
+1. Bird-drop
+2. Dusty
 3. Physical-Damage
 ```
 
+Another tested output:
+
+```text
+Prediction: Physical-Damage
+Confidence: 45.8%
+```
+
 ---
 
-## Deployment
+## How to Run the Project Locally
 
-The Streamlit application was deployed using AWS EC2.
+### 1. Clone the Repository
 
-### Deployment Steps
+```bash
+git clone <repository-url>
+cd solar-panel-defect-classification
+```
 
-1. Launch EC2 Instance
-2. Install Python Dependencies
-3. Upload Project Files
-4. Install Requirements
-5. Run Streamlit Server
-6. Open Port 8501
-7. Access Application via Public IP
+### 2. Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 3. Run Streamlit App
+
+```bash
+streamlit run app.py
+```
+
+### 4. Open in Browser
+
+```text
+http://localhost:8501
+```
+
+---
+
+## Requirements
+
+Example `requirements.txt`:
+
+```text
+streamlit
+tensorflow
+numpy
+pillow
+matplotlib
+keras-tuner
+```
 
 ---
 
 ## Project Structure
 
 ```text
-Solar-Panel-Defect-Classifier/
+solar-panel-defect-classification/
 │
 ├── app.py
-├── trained_effnet_finetune.h5
+├── trained_effnet_finetune.keras
 ├── requirements.txt
 ├── README.md
 │
+├── notebooks/
+│   └── solar_panel_classification.ipynb
+│
 ├── dataset/
+│   ├── Bird-drop/
 │   ├── Clean/
-│   ├── Bird-Drop/
 │   ├── Dusty/
-│   ├── Electrical-Damage/
+│   ├── Electrical-damage/
 │   ├── Physical-Damage/
 │   └── Snow-Covered/
-│
-├── notebooks/
-│   ├── CNN_Model.ipynb
-│   ├── MobileNetV2.ipynb
-│   ├── EfficientNetB0.ipynb
-│   └── Hyperparameter_Tuning.ipynb
 │
 └── screenshots/
 ```
 
 ---
 
+## Deployment
+
+The application can be deployed using:
+
+* AWS EC2
+* Azure
+* GCP
+* Streamlit Community Cloud
+* Docker-based deployment
+
+For AWS EC2 deployment:
+
+```bash
+streamlit run app.py --server.address 0.0.0.0 --server.port 8501
+```
+
+Then open port `8501` in the EC2 security group.
+
+---
+
 ## Key Learnings
 
-* Image Classification using CNNs
-* Transfer Learning with MobileNetV2
-* Transfer Learning with EfficientNetB0
-* Data Augmentation Techniques
-* Hyperparameter Optimization using Keras Tuner
-* Streamlit Application Development
-* AWS Cloud Deployment
-* End-to-End Deep Learning Project Lifecycle
+* CNN-based image classification
+* Overfitting detection
+* Transfer learning
+* MobileNetV2 implementation
+* EfficientNetB0 implementation
+* Class imbalance handling
+* Keras Tuner hyperparameter optimization
+* Streamlit app development
+* Model deployment preparation
 
 ---
 
-## Future Enhancements
+## Final Conclusion
 
-* Increase dataset size
-* Add object detection capabilities
-* Implement defect localization
-* Integrate drone-based image collection
-* Deploy using Docker and Kubernetes
-* Add monitoring dashboard
-* Build REST APIs using FastAPI
+This project successfully built a solar panel defect classification system using deep learning. A custom CNN model was first tested but suffered from overfitting. Transfer learning improved performance, with EfficientNetB0 giving the best results. After hyperparameter tuning, the final model achieved approximately 79.66% validation accuracy and was integrated into a Streamlit application for real-time image classification.
 
----
+The final app can classify solar panel images into six categories: Bird-drop, Clean, Dusty, Electrical-damage, Physical-Damage, and Snow-Covered.
 
-## Conclusion
-
-This project demonstrates a complete end-to-end Deep Learning workflow for solar panel defect detection. Starting from dataset exploration and custom CNN models, the project evolved into a high-performing Transfer Learning solution using EfficientNetB0 and Hyperparameter Optimization. The final model achieved approximately 83% validation accuracy and was successfully integrated into a Streamlit web application for real-time predictions and cloud deployment.
