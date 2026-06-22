@@ -16,7 +16,7 @@ st.write("Upload an image of a solar panel to detect defects using your model")
 # Loading the model
 @st.cache_resource
 def load_model():
-    model = tf.keras.models.load_model("trained_effnet_finetune.h5")
+    model = tf.keras.models.load_model("trained_effnet_finetune.keras")
     return model
 
 with st.spinner("Loading model..."):
